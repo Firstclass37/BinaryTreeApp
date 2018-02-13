@@ -34,28 +34,13 @@ namespace BinaryTreeApp
         {
             var isExist = false;
             if (_root != null)
-                 isExist = Contains(_root, value);
-            return isExist;
-        }
-        
-        
-        private bool Contains(TreeNode<T> currentNode, T value)
-        {
-            var isExist = false;
-            if (currentNode == null)
-                isExist =  false;
-            else if (_comparer.Compare(currentNode.Value, value) == 0)
-                isExist = true;
-            else if (_comparer.Compare(currentNode.Value, value) == 1)
-                isExist =  Contains(currentNode.LeftChild, value);
-            else if (_comparer.Compare(currentNode.Value, value) == -1)
-                isExist = Contains(currentNode.RigthChild, value);
+                 isExist = Find(_root, value) != null;
             return isExist;
         }
 
         private void Add(TreeNode<T> currentNode, TreeNode<T> node)
         {
-            if (_comparer.Compare(currentNode.Value, node.Value) == 1 || HasEqualsChild(currentNode, node))
+            if (_comparer.Compare(currentNode.Value, node.Value) == 0 || HasEqualsChild(currentNode, node))
                 return;
             if (TrySetChild(currentNode, node))
                 return;
@@ -63,6 +48,20 @@ namespace BinaryTreeApp
                 Add(currentNode.RigthChild, node);
             else if(_comparer.Compare(currentNode.Value, node.Value) == 1)
                 Add(currentNode.LeftChild, node);
+        }
+
+        private TreeNode<T> Find(TreeNode<T> currentNode, T value)
+        {
+            TreeNode<T> foundNode = null;
+            if (currentNode == null)
+                foundNode = null;
+            else if (_comparer.Compare(currentNode.Value, value) == 0)
+                foundNode = currentNode;
+            else if (_comparer.Compare(currentNode.Value, value) == 1)
+                foundNode = Find(currentNode.LeftChild, value);
+            else if (_comparer.Compare(currentNode.Value, value) == -1)
+                foundNode = Find(currentNode.RigthChild, value);
+            return foundNode;
         }
 
         private bool HasEqualsChild(TreeNode<T> node, TreeNode<T> nodeForCheck)
