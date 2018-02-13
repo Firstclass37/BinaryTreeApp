@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace BinaryTreeApp
 {
@@ -8,7 +9,7 @@ namespace BinaryTreeApp
         {
             //var needNext = true;
             var ints = UiManager.AskIntArray("Input numbers (min 1)");
-            var tree = new BinaryTree();
+            var tree = new BinaryTree<int>(Comparer<int>.Create((x, y) => Math.Sign(x - y)));
             tree.Add(ints);
             do
             {

@@ -1,38 +1,19 @@
 ﻿
+using System;
+
 namespace BinaryTreeApp
 {
-    internal sealed class TreeNode
+    internal sealed class TreeNode<T>
     {
-        public TreeNode(int value)
+        public TreeNode(T value)
         {
             Value = value;
         }
+        
+        public T Value { get; }
 
-        public int Value { get; }
+        public TreeNode<T> LeftChild { get; set; }
 
-        public TreeNode LeftChild { get; set; }
-
-        public TreeNode RigthChild { get; set; }
-
-        public static bool operator > (TreeNode first, TreeNode second)
-        {
-            return first?.Value > second?.Value;
-        }
-
-        public static bool operator <(TreeNode first, TreeNode second)
-        {
-            return first?.Value < second?.Value;
-        }
-
-        public static bool operator ==(TreeNode first, TreeNode second)
-        {
-            return first?.Value == second?.Value;
-        }
-
-
-        public static bool operator !=(TreeNode first, TreeNode second)
-        {
-            return first?.Value == second?.Value;
-        }
+        public TreeNode<T> RigthChild { get; set; }
     }
 }

@@ -1,73 +1,85 @@
-﻿namespace BinaryTreeApp
+﻿using System;
+using System.Collections.Generic;
+
+namespace BinaryTreeApp
 {
-    internal sealed class BinaryTree
+    internal sealed class BinaryTree<T>
     {
-        private TreeNode _root;
+        private TreeNode<T> _root;
+        private readonly IComparer<T> _comparer;
 
-
-        public void Add(int value)
+        public BinaryTree(IComparer<T> comparer)
         {
-            var inputNode = new TreeNode(value);
-            if (object.ReferenceEquals(_root, null))
+            _comparer = comparer ?? throw new ArgumentNullException(nameof(comparer));
+        }
+
+        public void Add(T value)
+        {
+            var inputNode = new TreeNode<T>(value);
+            if (_root ==  null)
                 _root = inputNode;
             else
                 Add(_root, inputNode);
         }
 
-        public void Add(int[] values)
+        public void Add(T[] values)
         {
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
             foreach (var value in values)
                 Add(value);
         }
 
-        public bool Contains(int value)
+        public bool Contains(T value)
         {
             var isExist = false;
-            if (!object.ReferenceEquals(_root, null))
-                 isExist = Contains(_root, new TreeNode(value));
+            if (_root != null)
+                 isExist = Contains(_root, value);
             return isExist;
         }
-
-        private bool Contains(TreeNode currentNode, TreeNode node)
+        
+        
+        private bool Contains(TreeNode<T> currentNode, T value)
         {
-            bool isExist = false;
-            if (object.ReferenceEquals(currentNode, null))
+            var isExist = false;
+            if (currentNode == null)
                 isExist =  false;
-            else if (currentNode == node)
+            else if (_comparer.Compare(currentNode.Value, value) == 0)
                 isExist = true;
-            else if (node > currentNode)
-                isExist =  Contains(currentNode.RigthChild, node);
-            else if (node < currentNode)
-                isExist = Contains(currentNode.LeftChild, node);
+            else if (_comparer.Compare(currentNode.Value, value) == 1)
+                isExist =  Contains(currentNode.LeftChild, value);
+            else if (_comparer.Compare(currentNode.Value, value) == -1)
+                isExist = Contains(currentNode.RigthChild, value);
             return isExist;
         }
 
-        private void Add(TreeNode currentNode, TreeNode node)
+        private void Add(TreeNode<T> currentNode, TreeNode<T> node)
         {
-            if (currentNode == node || HasEqualsChild(currentNode, node))
+            if (_comparer.Compare(currentNode.Value, node.Value) == 1 || HasEqualsChild(currentNode, node))
                 return;
             if (TrySetChild(currentNode, node))
                 return;
-            if(node < currentNode)
-                Add(currentNode.LeftChild, node);
-            if(node > currentNode)
+            if(_comparer.Compare(currentNode.Value, node.Value) == -1)
                 Add(currentNode.RigthChild, node);
+            else if(_comparer.Compare(currentNode.Value, node.Value) == 1)
+                Add(currentNode.LeftChild, node);
         }
 
-        private bool HasEqualsChild(TreeNode node, TreeNode nodeForCheck)
+        private bool HasEqualsChild(TreeNode<T> node, TreeNode<T> nodeForCheck)
         {
-            return node.LeftChild == nodeForCheck || node.RigthChild == nodeForCheck;
+            return node.LeftChild != null && _comparer.Compare(node.LeftChild.Value, nodeForCheck.Value) == 0 ||
+                   node.RigthChild != null && _comparer.Compare(node.RigthChild.Value, nodeForCheck.Value) == 0;
         }
 
-        private bool TrySetChild(TreeNode node, TreeNode checkNode)
+        private bool TrySetChild(TreeNode<T> node, TreeNode<T> checkNode)
         {
-            bool added = false;
-            if (checkNode < node && object.ReferenceEquals(node.LeftChild, null))
+            var added = false;
+            if (_comparer.Compare(checkNode.Value, node.Value) == -1 && node.LeftChild == null)
             {
                 node.LeftChild = checkNode;
                 added = true;
             }
-            else if (checkNode > node && object.ReferenceEquals(node.RigthChild, null))
+            else if (_comparer.Compare(checkNode.Value, node.Value) == 1 && node.RigthChild == null)
             {
                 node.RigthChild = checkNode;
                 added = true;
