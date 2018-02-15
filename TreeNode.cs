@@ -10,7 +10,7 @@ namespace BinaryTreeApp
             Value = value;
         }
         
-        public T Value { get; }
+        public T Value { get; set; }
 
         public TreeNode<T> LeftChild { get; set; }
 

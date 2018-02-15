@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace BinaryTreeApp
 {
@@ -38,6 +39,30 @@ namespace BinaryTreeApp
             return isExist;
         }
 
+        public void Remove(T value)
+        {
+            if (_root == null)
+                return;
+            if (_comparer.Compare(_root.Value, value) == 0)
+            {
+                _root = FindReplacement(_root);
+            }
+            else
+            {
+                var parent = FindParent(_root, value);
+                if (parent == null)
+                    return;
+                if (parent.LeftChild != null && _comparer.Compare(parent.LeftChild.Value, value) == 0)
+                {
+                    parent.LeftChild = FindReplacement(parent.LeftChild);
+                }
+                else if (parent.RigthChild != null && _comparer.Compare(parent.RigthChild.Value, value) == 0)
+                {
+                    parent.RigthChild = FindReplacement(parent.RigthChild);
+                }
+            }
+        }
+
         private void Add(TreeNode<T> currentNode, TreeNode<T> node)
         {
             if (_comparer.Compare(currentNode.Value, node.Value) == 0 || HasEqualsChild(currentNode, node))
@@ -64,10 +89,55 @@ namespace BinaryTreeApp
             return foundNode;
         }
 
+        private TreeNode<T> FindParent(TreeNode<T> currentNode, T value)
+        {
+            TreeNode<T> parent = null;
+            if (currentNode == null)
+                parent = null;
+            else if (HasEqualsChild(currentNode, value))
+                parent = currentNode;
+            else if (_comparer.Compare(currentNode.Value, value) == 1)
+                parent = FindParent(currentNode.LeftChild, value);
+            else if (_comparer.Compare(currentNode.Value, value) == -1)
+                parent = FindParent(currentNode.RigthChild, value);
+            return parent;
+        }
+
+        private TreeNode<T> FindReplacement(TreeNode<T> searchFor)
+        {
+            if (searchFor.LeftChild == null && searchFor.RigthChild == null)
+                return null;
+            if (searchFor.LeftChild != null && searchFor.RigthChild == null)
+                return searchFor.LeftChild;
+            if (searchFor.RigthChild != null && searchFor.LeftChild == null)
+                return searchFor.RigthChild;
+            var lastLeft =  TakeLastLeft(searchFor.RigthChild, searchFor);
+            searchFor.Value = lastLeft.Value;
+            return searchFor;
+        }
+
+        private TreeNode<T> TakeLastLeft(TreeNode<T> searchFor, TreeNode<T> parent)
+        {
+            if (searchFor == null)
+                return null;
+            if (searchFor.LeftChild == null)
+            {
+                parent.LeftChild = null;
+                return searchFor;
+            }
+            return TakeLastLeft(searchFor.LeftChild, searchFor);
+        }
+
         private bool HasEqualsChild(TreeNode<T> node, TreeNode<T> nodeForCheck)
         {
             return node.LeftChild != null && _comparer.Compare(node.LeftChild.Value, nodeForCheck.Value) == 0 ||
                    node.RigthChild != null && _comparer.Compare(node.RigthChild.Value, nodeForCheck.Value) == 0;
+        }
+
+        private bool HasEqualsChild(TreeNode<T> node, T value)
+        {
+            return node.LeftChild != null && _comparer.Compare(node.LeftChild.Value, value) == 0 ||
+                   node.RigthChild != null && _comparer.Compare(node.RigthChild.Value, value) == 0;
         }
 
         private bool TrySetChild(TreeNode<T> node, TreeNode<T> checkNode)

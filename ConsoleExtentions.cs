@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace BinaryTreeApp
 {
-    internal static class UiManager
+    internal static class ConsoleExtentions
     {
         public static int[] AskIntArray(string message)
         {
@@ -34,7 +34,6 @@ namespace BinaryTreeApp
             } while (!gotInt);
             return value;
         }
-
 
         public static bool AskBool(string message)
         {
