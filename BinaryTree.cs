@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text;
 
 namespace BinaryTreeApp
 {
@@ -13,6 +14,51 @@ namespace BinaryTreeApp
         {
             _comparer = comparer ?? throw new ArgumentNullException(nameof(comparer));
         }
+
+        
+        // smpt   from to data 
+        // 
+        // 
+        // 
+        
+        public string Show(ShowType type)
+        {
+            switch (type)
+            {
+               case ShowType.Infix : return ShowInfix(_root);
+               case ShowType.Postfix : return ShowPost(_root);
+               case ShowType.Prefix : return ShowPrefix(_root);
+            }
+            return ShowPost(_root);
+        }
+
+        private string ShowInfix(TreeNode<T> node)
+        {
+            if (node == null)
+                return " ";
+            if (node.RigthChild == null && node.LeftChild == null)
+                return node.Value.ToString();
+            return $"({ShowInfix(node.LeftChild)}, {node.Value.ToString()}, {ShowInfix(node.RigthChild)})";
+        }
+        
+        private string ShowPost(TreeNode<T> node)
+        {
+            if (node == null)
+                return " ";
+            if (node.RigthChild == null && node.LeftChild == null)
+                return node.Value.ToString();
+            return $"({ShowPost(node.LeftChild)}, {ShowPost(node.RigthChild)}), {node.Value.ToString()}";
+        }
+        
+        private string ShowPrefix(TreeNode<T> node)
+        {
+            if (node == null)
+                return " ";
+            if (node.RigthChild == null && node.LeftChild == null)
+                return node.Value.ToString();
+            return $"({node.Value.ToString()}, {ShowPrefix(node.LeftChild)}, {ShowPrefix(node.RigthChild)})";
+        }
+
 
         public void Add(T value)
         {
