@@ -1,7 +1,4 @@
-﻿
-using System;
-
-namespace BinaryTreeApp
+﻿namespace BinaryTreeApp
 {
     internal sealed class TreeNode<T>
     {
@@ -12,8 +9,8 @@ namespace BinaryTreeApp
         
         public T Value { get; set; }
 
-        public TreeNode<T> LeftChild { get; set; }
+        public TreeNode<T> LeftChild;
 
-        public TreeNode<T> RigthChild { get; set; }
+        public TreeNode<T> RigthChild;
     }
 }

@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Text;
 
 namespace BinaryTreeApp
 {
-    internal sealed class BinaryTree<T>
+    internal sealed class BinaryTree<T> : IFormattable
     {
         private TreeNode<T> _root;
         private readonly IComparer<T> _comparer;
@@ -14,59 +12,11 @@ namespace BinaryTreeApp
         {
             _comparer = comparer ?? throw new ArgumentNullException(nameof(comparer));
         }
-
         
-        // smpt   from to data 
-        // 
-        // 
-        // 
-        
-        public string Show(ShowType type)
-        {
-            switch (type)
-            {
-               case ShowType.Infix : return ShowInfix(_root);
-               case ShowType.Postfix : return ShowPost(_root);
-               case ShowType.Prefix : return ShowPrefix(_root);
-            }
-            return ShowPost(_root);
-        }
-
-        private string ShowInfix(TreeNode<T> node)
-        {
-            if (node == null)
-                return " ";
-            if (node.RigthChild == null && node.LeftChild == null)
-                return node.Value.ToString();
-            return $"({ShowInfix(node.LeftChild)}, {node.Value.ToString()}, {ShowInfix(node.RigthChild)})";
-        }
-        
-        private string ShowPost(TreeNode<T> node)
-        {
-            if (node == null)
-                return " ";
-            if (node.RigthChild == null && node.LeftChild == null)
-                return node.Value.ToString();
-            return $"({ShowPost(node.LeftChild)}, {ShowPost(node.RigthChild)}), {node.Value.ToString()}";
-        }
-        
-        private string ShowPrefix(TreeNode<T> node)
-        {
-            if (node == null)
-                return " ";
-            if (node.RigthChild == null && node.LeftChild == null)
-                return node.Value.ToString();
-            return $"({node.Value.ToString()}, {ShowPrefix(node.LeftChild)}, {ShowPrefix(node.RigthChild)})";
-        }
-
-
         public void Add(T value)
         {
             var inputNode = new TreeNode<T>(value);
-            if (_root ==  null)
-                _root = inputNode;
-            else
-                Add(_root, inputNode);
+            Add(ref _root, inputNode);
         }
 
         public void Add(T[] values)
@@ -79,127 +29,106 @@ namespace BinaryTreeApp
 
         public bool Contains(T value)
         {
-            var isExist = false;
-            if (_root != null)
-                 isExist = Find(_root, value) != null;
+            var isExist = IsExist(_root, value);
             return isExist;
         }
 
         public void Remove(T value)
         {
-            if (_root == null)
-                return;
-            if (_comparer.Compare(_root.Value, value) == 0)
+            Remove(ref _root, value);
+        }
+
+        public override string ToString()
+        {
+            return this.ToString("inx", null);
+        }
+
+        public string ToString(string format, IFormatProvider formatProvider)
+        {
+            var targetFormat = format.ToUpperInvariant();
+            switch (targetFormat)
             {
-                _root = FindReplacement(_root);
-            }
-            else
-            {
-                var parent = FindParent(_root, value);
-                if (parent == null)
-                    return;
-                if (parent.LeftChild != null && _comparer.Compare(parent.LeftChild.Value, value) == 0)
-                {
-                    parent.LeftChild = FindReplacement(parent.LeftChild);
-                }
-                else if (parent.RigthChild != null && _comparer.Compare(parent.RigthChild.Value, value) == 0)
-                {
-                    parent.RigthChild = FindReplacement(parent.RigthChild);
-                }
+                case "PRX":
+                    return Show(_root, ShowType.Prefix);
+                case "PSX":
+                    return Show(_root, ShowType.Postfix);
+                case "INX":
+                    return Show(_root, ShowType.Infix);
+                default:
+                    throw new FormatException($"The format \"{format}\" is not supported.");
             }
         }
 
-        private void Add(TreeNode<T> currentNode, TreeNode<T> node)
+        private void Remove(ref TreeNode<T> currentNode, T value)
         {
-            if (_comparer.Compare(currentNode.Value, node.Value) == 0 || HasEqualsChild(currentNode, node))
-                return;
-            if (TrySetChild(currentNode, node))
-                return;
-            if(_comparer.Compare(currentNode.Value, node.Value) == -1)
-                Add(currentNode.RigthChild, node);
-            else if(_comparer.Compare(currentNode.Value, node.Value) == 1)
-                Add(currentNode.LeftChild, node);
-        }
-
-        private TreeNode<T> Find(TreeNode<T> currentNode, T value)
-        {
-            TreeNode<T> foundNode = null;
             if (currentNode == null)
-                foundNode = null;
-            else if (_comparer.Compare(currentNode.Value, value) == 0)
-                foundNode = currentNode;
-            else if (_comparer.Compare(currentNode.Value, value) == 1)
-                foundNode = Find(currentNode.LeftChild, value);
+                return;
+            if (_comparer.Compare(currentNode.Value, value) == 0)
+            {
+                if (currentNode.LeftChild == null && currentNode.RigthChild == null)
+                    currentNode = null;
+                else if (currentNode.LeftChild != null && currentNode.RigthChild == null)
+                    currentNode = currentNode.LeftChild;
+                else if (currentNode.RigthChild != null && currentNode.LeftChild == null)
+                    currentNode = currentNode.RigthChild;
+                else
+                    currentNode.Value = TakeLastLeftValue(ref currentNode.RigthChild);
+            }
             else if (_comparer.Compare(currentNode.Value, value) == -1)
-                foundNode = Find(currentNode.RigthChild, value);
-            return foundNode;
+                Remove(ref currentNode.RigthChild, value);
+            else if (_comparer.Compare(currentNode.Value, value) == 1)
+                Remove(ref currentNode.LeftChild, value);
         }
 
-        private TreeNode<T> FindParent(TreeNode<T> currentNode, T value)
+        private string Show(TreeNode<T> node, ShowType showType)
         {
-            TreeNode<T> parent = null;
+            if (node == null)
+                return " ";
+            if (node.RigthChild == null && node.LeftChild == null)
+                return node.Value.ToString();
+            switch (showType)
+            {
+                case ShowType.Prefix: return $"({node.Value.ToString()}, {Show(node.LeftChild, showType)}, {Show(node.RigthChild, showType)})";
+                case ShowType.Infix: return $"({Show(node.LeftChild, showType)}, {node.Value.ToString()}, {Show(node.RigthChild, showType)})";
+                case ShowType.Postfix: return $"({Show(node.LeftChild, showType)}, {Show(node.RigthChild, showType)}), {node.Value.ToString()}";
+            }
+            throw new Exception("oops:(");
+        }
+
+        private T TakeLastLeftValue(ref TreeNode<T> currentNode)
+        {
+            if (currentNode.LeftChild != null)
+                return TakeLastLeftValue(ref currentNode.LeftChild);
+            if (currentNode.RigthChild != null)
+                return TakeLastLeftValue(ref currentNode.RigthChild);
+            var value = currentNode.Value;
+            currentNode = null;
+            return value;
+        }
+
+        private void Add(ref TreeNode<T> currentNode, TreeNode<T> node)
+        {
             if (currentNode == null)
-                parent = null;
-            else if (HasEqualsChild(currentNode, value))
-                parent = currentNode;
-            else if (_comparer.Compare(currentNode.Value, value) == 1)
-                parent = FindParent(currentNode.LeftChild, value);
-            else if (_comparer.Compare(currentNode.Value, value) == -1)
-                parent = FindParent(currentNode.RigthChild, value);
-            return parent;
+                currentNode = node;
+            if (_comparer.Compare(currentNode.Value, node.Value) == 0)
+                return;
+            if (_comparer.Compare(currentNode.Value, node.Value) == -1)
+                Add(ref currentNode.RigthChild, node);
+            else if (_comparer.Compare(currentNode.Value, node.Value) == 1)
+                Add(ref currentNode.LeftChild, node);
         }
 
-        private TreeNode<T> FindReplacement(TreeNode<T> searchFor)
+        private bool IsExist(TreeNode<T> currentNode, T value)
         {
-            if (searchFor.LeftChild == null && searchFor.RigthChild == null)
-                return null;
-            if (searchFor.LeftChild != null && searchFor.RigthChild == null)
-                return searchFor.LeftChild;
-            if (searchFor.RigthChild != null && searchFor.LeftChild == null)
-                return searchFor.RigthChild;
-            var lastLeft =  TakeLastLeft(searchFor.RigthChild, searchFor);
-            searchFor.Value = lastLeft.Value;
-            return searchFor;
-        }
-
-        private TreeNode<T> TakeLastLeft(TreeNode<T> searchFor, TreeNode<T> parent)
-        {
-            if (searchFor == null)
-                return null;
-            if (searchFor.LeftChild == null)
-            {
-                parent.LeftChild = null;
-                return searchFor;
-            }
-            return TakeLastLeft(searchFor.LeftChild, searchFor);
-        }
-
-        private bool HasEqualsChild(TreeNode<T> node, TreeNode<T> nodeForCheck)
-        {
-            return node.LeftChild != null && _comparer.Compare(node.LeftChild.Value, nodeForCheck.Value) == 0 ||
-                   node.RigthChild != null && _comparer.Compare(node.RigthChild.Value, nodeForCheck.Value) == 0;
-        }
-
-        private bool HasEqualsChild(TreeNode<T> node, T value)
-        {
-            return node.LeftChild != null && _comparer.Compare(node.LeftChild.Value, value) == 0 ||
-                   node.RigthChild != null && _comparer.Compare(node.RigthChild.Value, value) == 0;
-        }
-
-        private bool TrySetChild(TreeNode<T> node, TreeNode<T> checkNode)
-        {
-            var added = false;
-            if (_comparer.Compare(checkNode.Value, node.Value) == -1 && node.LeftChild == null)
-            {
-                node.LeftChild = checkNode;
-                added = true;
-            }
-            else if (_comparer.Compare(checkNode.Value, node.Value) == 1 && node.RigthChild == null)
-            {
-                node.RigthChild = checkNode;
-                added = true;
-            }
-            return added;
+            if (currentNode == null)
+                return false;
+            if (_comparer.Compare(currentNode.Value, value) == 0)
+                return true;
+            if (_comparer.Compare(currentNode.Value, value) == 1)
+                return IsExist(currentNode.LeftChild, value);
+            if (_comparer.Compare(currentNode.Value, value) == -1)
+                return IsExist(currentNode.RigthChild, value);
+            return false;
         }
     }
 }
