@@ -18,7 +18,7 @@ namespace BinaryTreeApp
             var tree = new BinaryTree<int>(Comparer<int>.Create((x, y) => Math.Sign(x - y)));
             tree.Add(new[] { 7, 4, 9, 1, 3, -1, 8, 2, 11 });
             Console.WriteLine($"{tree:inx}");
-            tree.Remove(9);
+            tree.Remove(1);
             Console.WriteLine($"{tree:inx}");
         }
 
