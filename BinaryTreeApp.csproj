@@ -36,15 +36,18 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BinaryTree.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ShowType.cs" />
-    <Compile Include="TreeNode.cs" />
     <Compile Include="ConsoleExtentions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Tree\Tree.csproj">
+      <Project>{e36935de-2266-4055-a7be-042860baaa6e}</Project>
+      <Name>Tree</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

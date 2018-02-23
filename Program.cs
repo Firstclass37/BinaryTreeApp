@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Tree;
 
 namespace BinaryTreeApp
 {
@@ -8,23 +9,38 @@ namespace BinaryTreeApp
     {
         static void Main(string[] args)
         {
+           var trree = new BinaryTree<string>();
+           Contains();
            Remove();
            Console.ReadKey();
         }
 
-
         private static void Remove()
         {
-            var tree = new BinaryTree<int>(Comparer<int>.Create((x, y) => Math.Sign(x - y)));
+            var tree = new BinaryTree<int>();
             tree.Add(new[] { 7, 4, 9, 1, 3, -1, 8, 2, 11 });
-            Console.WriteLine($"{tree:inx}");
+            Console.WriteLine(tree.Show());
             tree.Remove(1);
-            Console.WriteLine($"{tree:inx}");
+            Console.WriteLine(tree.Show());
+        }
+
+        private static void Contains()
+        {
+            //var needNext = true;
+            var ints = ConsoleExtentions.AskIntArray("Input numbers (min 1)");
+            var tree = new BinaryTree<int>();
+            tree.Add(ints);
+            do
+            {
+                var number = ConsoleExtentions.AskInt("Number for check");
+                Console.WriteLine($"Contains : {tree.Contains(number)}");
+                //needNext = UiManager.AskBool("Continue");
+            } while (true);
         }
 
         private static void ShowTree()
         {
-            var tree = new BinaryTree<int>(Comparer<int>.Create((x, y) => Math.Sign(x - y)));
+            var tree = new BinaryTree<int>();
             tree.Add(new[] { 7, 4, 9, 1, 3, -1, 8, 2, 11 });
             do
             {
