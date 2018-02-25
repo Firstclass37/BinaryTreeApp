@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using Tree;
 
 namespace BinaryTreeApp
@@ -49,11 +47,11 @@ namespace BinaryTreeApp
                 var answer = Console.ReadKey();
                 Console.WriteLine();
                 if (answer.Key == ConsoleKey.D1)
-                    Console.WriteLine($"{tree:prx}");
+                    Console.WriteLine(tree.Show(ShowType.Prefix));
                 else if (answer.Key == ConsoleKey.D2)
-                    Console.WriteLine($"{tree:psx}");
+                    Console.WriteLine(tree.Show(ShowType.Postfix));
                 else if (answer.Key == ConsoleKey.D3)
-                    Console.WriteLine($"{tree:inx}");
+                    Console.WriteLine(tree.Show(ShowType.Infix));
                 else
                     Console.WriteLine(":(");
                 //needNext = UiManager.AskBool("Continue");
